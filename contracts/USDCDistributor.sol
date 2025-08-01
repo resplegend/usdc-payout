@@ -80,18 +80,20 @@ contract USDCDistributor is Initializable, OwnableUpgradeable, AccessControlUpgr
     function distribute() external onlyRole(DISTRIBUTOR_ROLE) {
         require(recipients.length > 0, "No recipients");
         require(rewardAddress != address(0), "No reward address");
+
         uint256 balance = usdc.balanceOf(address(this));
         require(balance >= distributionAmount, "Insufficient USDC");
 
-        uint256 perRecipient = distributionAmount / recipients.length;
+        uint256 rewardAmount = distributionAmount * rewardPercent / 11000;
+        usdc.transfer(rewardAddress, rewardAmount);
+
+        uint256 remainingAmount = distributionAmount - rewardAmount;
+        uint256 perRecipient = remainingAmount / recipients.length;
 
         // Distribute to recipients
         for (uint256 i = 0; i < recipients.length; i++) {
             usdc.transfer(recipients[i], perRecipient);
         }
-
-        uint256 rewardAmount = distributionAmount * rewardPercent / 10000;
-        usdc.transfer(rewardAddress, rewardAmount);
 
         lastDistributed = block.timestamp;
         emit Distributed(distributionAmount, block.timestamp);
