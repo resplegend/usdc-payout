@@ -7,16 +7,22 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 contract USDCDistributor is Initializable, OwnableUpgradeable {
     ERC20Upgradeable public usdc;
+
+    // Recipients and their distribution percentages
     address[] public recipients;
     uint256 public recipientsPercent; // e.g., 9000 for 90.00%
+
+    // Reward address and its percentage
     address public rewardAddress;
     uint256 public rewardPercent; // e.g., 1000 for 10.00%
+
+
     uint256 public lastDistributed;
     uint256 public distributionAmount; // Amount to distribute per call, in USDC's smallest unit
 
     event Distributed(uint256 totalAmount, uint256 timestamp);
     event RecipientsUpdated(address[] recipients, uint256 recipientsPercent);
-    event RewardAddressUpdated(address rewardAddress, uint256 rewardPercent);
+    event RewardsDataUpdated(address rewardAddress, uint256 rewardPercent);
     event Withdrawn(address to, uint256 amount);
 
     function initialize(
@@ -55,7 +61,7 @@ contract USDCDistributor is Initializable, OwnableUpgradeable {
         emit RecipientsUpdated(_recipients, _recipientsPercent);
     }
 
-    function setRewardAddress(
+    function setRewardsData(
         address _rewardAddress,
         uint256 _rewardPercent
     ) external onlyOwner {
@@ -66,7 +72,7 @@ contract USDCDistributor is Initializable, OwnableUpgradeable {
         );
         rewardAddress = _rewardAddress;
         rewardPercent = _rewardPercent;
-        emit RewardAddressUpdated(_rewardAddress, _rewardPercent);
+        emit RewardsDataUpdated(_rewardAddress, _rewardPercent);
     }
 
     function setDistributionAmount(
