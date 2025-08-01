@@ -1,8 +1,10 @@
 import { ethers, upgrades } from "hardhat";
+import * as dotenv from "dotenv";
+
+dotenv.config();
 
 async function main() {
-  // === CONFIGURE THESE VALUES ===
-  const usdcAddress = "<USDC_TOKEN_ADDRESS>"; // Polygon USDC token address
+  const usdcAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
   const recipients = [
     "<RECIPIENT_1>",
     "<RECIPIENT_2>",
@@ -10,12 +12,9 @@ async function main() {
     "<RECIPIENT_4>",
     "<RECIPIENT_5>"
   ];
-  const recipientsPercent = 9000; // 90.00% (9000/10000)
   const rewardAddress = "<REWARD_ADDRESS>";
-  const rewardPercent = 1000; // 10.00% (1000/10000)
-  const distributionAmount = 25 * 10 ** 6; // 25 USDC (6 decimals)
-
-  // ==============================
+  const rewardPercent = 1000; // 10.00% (1000/10000) or set to 500 for 5%
+  const distributionAmount = 27_500_000; // 27.5 USDC (6 decimals)
 
   const USDCDistributor = await ethers.getContractFactory("USDCDistributor");
   const distributor = await upgrades.deployProxy(
@@ -23,7 +22,6 @@ async function main() {
     [
       usdcAddress,
       recipients,
-      recipientsPercent,
       rewardAddress,
       rewardPercent,
       distributionAmount
@@ -31,7 +29,7 @@ async function main() {
     { initializer: "initialize" }
   );
   await distributor.waitForDeployment();
-  
+
   console.log("USDCDistributor deployed to:", await distributor.getAddress());
 }
 
