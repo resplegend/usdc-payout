@@ -2,20 +2,22 @@ name: USDC Distribution
 
 on:
   schedule:
-    - cron: '0 5 * * 5' # 00:00 EST Friday (EST = UTC-5)
+    - cron: '0 5 * * 5' # 05:00 UTC Friday (00:00 EST Friday)
   workflow_dispatch:
 
 jobs:
   distribute:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
@@ -26,4 +28,13 @@ jobs:
           RPC_URL: ${{ secrets.POLYGON_RPC_URL }}
           CONTRACT_ADDRESS: ${{ secrets.USDC_DISTRIBUTOR_ADDRESS }}
         run: |
-          npx ts-node scripts/distribute.ts 
+          echo "Starting USDC distribution at $(date)"
+          npx ts-node scripts/distribute.ts
+          echo "Distribution completed at $(date)"
+        timeout-minutes: 8
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ USDC distribution failed!"
+          echo "Check the logs above for details." 
